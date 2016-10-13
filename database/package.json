@@ -1,0 +1,12 @@
+{
+  "name": "disasterwatch-db-lambda",
+  "version": "0.1.0",
+  "description": "disasterwatch database crud interaction",
+  "main": "handler.js",
+  "engines": {
+    "node": "4.4.2"
+  },
+  "dependencies": {
+    "mongodb": "^2.2.10"
+  }
+}

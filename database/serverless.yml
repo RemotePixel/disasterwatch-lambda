@@ -1,0 +1,86 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: disasterwatch-api
+provider:
+  name: aws
+  runtime: nodejs4.3
+  stage: test
+  region: us-east-1
+functions:
+  add:
+    handler: handler.add
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          method: POST
+          path: add
+          request:
+            passThrough: WHEN_NO_MATCH
+          cors: true
+  remove:
+    handler: handler.remove
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          method: POST
+          path: remove
+          request:
+            passThrough: WHEN_NO_MATCH
+          cors: true
+  update:
+    handler: handler.update
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          method: POST
+          path: update
+          request:
+            passThrough: WHEN_NO_MATCH
+          cors: true
+  toGEOJSON:
+    handler: handler.toGEOJSON
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          method: GET
+          path: toGEOJSON
+          request:
+            passThrough: WHEN_NO_MATCH
+          cors: true
+  subscribe:
+    handler: handler.subscribe
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          method: POST
+          path: subscribe
+          request:
+            passThrough: WHEN_NO_MATCH
+          cors: true
+  unsubscribe:
+    handler: handler.unsubscribe
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          method: POST
+          path: unsubscribe
+          request:
+            passThrough: WHEN_NO_MATCH
+          cors: true
