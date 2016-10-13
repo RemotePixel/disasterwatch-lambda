@@ -1,0 +1,14 @@
+{
+  "name": "sentinel1_search",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "dependencies": {
+    "moment": "^2.15.1",
+    "superagent": "^2.3.0",
+    "wellknown": "^0.5.0"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}

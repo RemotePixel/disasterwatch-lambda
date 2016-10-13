@@ -14,9 +14,13 @@ module.exports.add = function(event, context) {
 
         var disaster = {
             uuid: uuid,
-            mail: [mailTo],
+            mail: [],
             feature: geojsonFeature
         };
+
+        if (mailTo) {
+            disaster.mail = [mailTo];
+        }
 
         col.insert(disaster, function(err, docs){
             if (err) {
@@ -29,7 +33,6 @@ module.exports.add = function(event, context) {
 
             console.log("disasterEvent Added to database");
             context.succeed("disasterEvent Added to database");
-            // context.done(null, "disasterEvent Added to database");
         });
     });
 };
@@ -45,17 +48,28 @@ module.exports.update = function(event, context) {
 
         delete geojsonFeature.properties.mail;
 
-        col.updateOne({uuid: uuid}, {$push: {'mail': mailTo}, $set: {'feature': geojsonFeature}}, function(err, doc) {
-            if (err) {
-                console.log("Couldn't update disasterEvent");
-                context.fail(err);
-            }
-            db.close();
-            console.log("Successfully updated disasterEvent");
-            //Confirmation MAIL to "event.mailTO"
-            context.succeed("Successfully updated disasterEvent");
-            // context.done(null, "Successfully updated disasterEvent");
-        });
+        if (mailTo) {
+            col.updateOne({uuid: uuid}, {$push: {'mail': mailTo}, $set: {'feature': geojsonFeature}}, function(err, doc) {
+                if (err) {
+                    console.log("Couldn't update disasterEvent");
+                    context.fail(err);
+                }
+                db.close();
+                console.log("Successfully updated disasterEvent");
+                //Confirmation MAIL to "event.mailTO"
+                context.succeed("Successfully updated disasterEvent");
+            });
+        } else {
+            col.updateOne({uuid: uuid}, {$set: {'feature': geojsonFeature}}, function(err, doc) {
+                if (err) {
+                    console.log("Couldn't update disasterEvent");
+                    context.fail(err);
+                }
+                db.close();
+                console.log("Successfully updated disasterEvent");
+                context.succeed("Successfully updated disasterEvent");
+            });
+        }
     });
 };
 
@@ -71,7 +85,6 @@ module.exports.remove = function(event, context) {
             db.close();
             console.log("disasterEvent Removed from database");
             context.succeed("disasterEvent Removed from database");
-            // context.done(null, "disasterEvent Removed from database");
         });
     });
 };
@@ -89,7 +102,6 @@ module.exports.subscribe = function(event, context) {
             console.log("Successfully subscribed to disasterEvent");
             //Confirmation MAIL to "event.mailTO"
             context.succeed("Successfully subscribed to disasterEvent");
-            // context.done(null, "Successfully subscribed to disasterEvent");
         });
     });
 };
@@ -98,7 +110,8 @@ module.exports.subscribe = function(event, context) {
 module.exports.unsubscribe = function(event, context) {
     mongodb.MongoClient.connect(mongodbUri, function(err, db) {
         var col = db.collection('disasters');
-        col.updateOne({uuid: event.body.uuid}, {$pull: {'mail': event.body.mailTO}}, function(err, doc) {
+
+        col.updateOne({uuid: event.body.uuid}, {$pull: {'mail': {'mail': event.body.mailTO}}}, function(err, doc) {
             if (err) {
                 console.log("Couldn't unsubscribe to disasterEvent");
                 context.fail(err);
@@ -107,7 +120,6 @@ module.exports.unsubscribe = function(event, context) {
             //Confirmation MAIL to "event.mailTO"
             console.log("Successfully unsubscribe to disasterEvent");
             context.succeed("Successfully unsubscribe to disasterEvent");
-            // context.done(null, "Successfully unsubscribe to disasterEvent");
         });
     });
 };
@@ -131,7 +143,6 @@ module.exports.toGEOJSON = function(event, context) {
                     geojson.features.push(feat)
                 });
                 context.succeed(geojson);
-                // context.done(null, geojson);
             }
             db.close();
             console.log("Done");
