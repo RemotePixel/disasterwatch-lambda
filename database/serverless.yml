@@ -62,6 +62,17 @@ functions:
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
+  getEvent:
+    handler: handler.getEvent
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          method: GET
+          path: getEvent
+          request:
+            passThrough: WHEN_NO_MATCH
+          cors: true
   subscribe:
     handler: handler.subscribe
     memorySize: 128

@@ -49,7 +49,7 @@ module.exports.update = function(event, context) {
         delete geojsonFeature.properties.mail;
 
         if (mail) {
-            col.updateOne({uuid: uuid}, {$push: {'mail': mail}, $set: {'feature': geojsonFeature}}, function(err, doc) {
+            col.updateOne({uuid: uuid}, {$push: {'mail': mail}, $set: {'feature': geojsonFeature}}, {upsert: true}, function(err, doc) {
                 if (err) {
                     console.log("Couldn't update disasterEvent");
                     context.fail(err);
@@ -60,7 +60,7 @@ module.exports.update = function(event, context) {
                 context.succeed("Successfully updated disasterEvent");
             });
         } else {
-            col.updateOne({uuid: uuid}, {$set: {'feature': geojsonFeature}}, function(err, doc) {
+            col.updateOne({uuid: uuid}, {$set: {'feature': geojsonFeature}}, {upsert: true}, function(err, doc) {
                 if (err) {
                     console.log("Couldn't update disasterEvent");
                     context.fail(err);
@@ -140,6 +140,33 @@ module.exports.toGEOJSON = function(event, context) {
 
                 docs.forEach(function(doc) {
                     var feat = doc.feature;
+                    feat.properties.nbfollowers = doc.mail.length;
+                    geojson.features.push(feat)
+                });
+                context.succeed(geojson);
+            }
+            db.close();
+            console.log("Done");
+        });
+    });
+};
+
+module.exports.getEvent = function(event, context) {
+    mongodb.MongoClient.connect(mongodbUri, function(err, db) {
+        var col = db.collection('disasters');
+        col.find({uuid:event.body.uuid}).toArray(function(err, docs) {
+            if (err) {
+                console.log("Couldn't retrieve disasterEvent from database");
+                context.fail(err);
+            } else {
+                var geojson = {
+                    "type": "FeatureCollection",
+                    "features": []
+                };
+
+                docs.forEach(function(doc) {
+                    var feat = doc.feature;
+                    feat.properties.nbfollowers = doc.mail.length;
                     geojson.features.push(feat)
                 });
                 context.succeed(geojson);
