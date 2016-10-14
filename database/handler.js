@@ -8,7 +8,7 @@ module.exports.add = function(event, context) {
         var col = db.collection('disasters');
         var geojsonFeature = event.body,
             uuid = geojsonFeature.properties.uuid,
-            mailTo = geojsonFeature.properties.mailTO;
+            mail = geojsonFeature.properties.mail;
 
         delete geojsonFeature.properties.mail;
 
@@ -18,8 +18,8 @@ module.exports.add = function(event, context) {
             feature: geojsonFeature
         };
 
-        if (mailTo) {
-            disaster.mail = [mailTo];
+        if (mail) {
+            disaster.mail = [mail];
         }
 
         col.insert(disaster, function(err, docs){
@@ -44,12 +44,12 @@ module.exports.update = function(event, context) {
 
         var geojsonFeature = event.body,
             uuid = geojsonFeature.properties.uuid,
-            mailTo = geojsonFeature.properties.mailTO;
+            mail = geojsonFeature.properties.mail;
 
         delete geojsonFeature.properties.mail;
 
-        if (mailTo) {
-            col.updateOne({uuid: uuid}, {$push: {'mail': mailTo}, $set: {'feature': geojsonFeature}}, function(err, doc) {
+        if (mail) {
+            col.updateOne({uuid: uuid}, {$push: {'mail': mail}, $set: {'feature': geojsonFeature}}, function(err, doc) {
                 if (err) {
                     console.log("Couldn't update disasterEvent");
                     context.fail(err);
@@ -93,7 +93,7 @@ module.exports.remove = function(event, context) {
 module.exports.subscribe = function(event, context) {
     mongodb.MongoClient.connect(mongodbUri, function(err, db) {
         var col = db.collection('disasters');
-        col.updateOne({uuid: event.body.uuid}, {$push: {'mail': event.body.mailTO}}, function(err, doc) {
+        col.updateOne({uuid: event.body.uuid}, {$push: {'mail': event.body.mail}}, function(err, doc) {
             if (err) {
                 console.log("Couldn't subscribe to disasterEvent");
                 context.fail(err);
@@ -111,7 +111,7 @@ module.exports.unsubscribe = function(event, context) {
     mongodb.MongoClient.connect(mongodbUri, function(err, db) {
         var col = db.collection('disasters');
 
-        col.updateOne({uuid: event.body.uuid}, {$pull: {'mail': {'mail': event.body.mailTO}}}, function(err, doc) {
+        col.updateOne({uuid: event.body.uuid}, {$pull: {'mail': {'mail': event.body.mail}}}, function(err, doc) {
             if (err) {
                 console.log("Couldn't unsubscribe to disasterEvent");
                 context.fail(err);
