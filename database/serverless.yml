@@ -17,6 +17,11 @@ provider:
   runtime: nodejs4.3
   stage: test
   region: us-east-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ses:*"
+      Resource: "*"
 functions:
   add:
     handler: handler.add
