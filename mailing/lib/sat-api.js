@@ -54,7 +54,7 @@ module.exports.getL8Images = function(feature, options, callback) {
             }
             return callback(null, results);
         } else {
-            return callback(err);
+            return callback(null, results);
         }
     })
 }
@@ -82,6 +82,9 @@ module.exports.getS2Images = function(feature, options, callback) {
         json: query
     }, function(err, response, data){
         if (!err && response.statusCode == 200) {
+            if (data.hasOwnProperty('errorMessage')) {
+                return callback(null, results);
+            }
             if (data.meta.found !== 0) {
                 var i;
                 for (i = 0; i < data.results.length; i += 1) {
@@ -104,7 +107,7 @@ module.exports.getS2Images = function(feature, options, callback) {
             }
             return callback(null, results);
         } else {
-            return callback(err);
+            return callback(null, results);
         }
     })
 }
