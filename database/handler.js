@@ -299,7 +299,7 @@ module.exports.toGEOJSON = function(event, context) {
 module.exports.getEvent = function(event, context) {
     mongodb.MongoClient.connect(mongodbUri, function(err, db) {
         var col = db.collection('disasters');
-        col.find({uuid:event.body.uuid}).toArray(function(err, docs) {
+        col.find({uuid:event.query.uuid}).toArray(function(err, docs) {
             if (err) {
                 console.log("Couldn't retrieve disasterEvent from database");
                 context.fail(err);
