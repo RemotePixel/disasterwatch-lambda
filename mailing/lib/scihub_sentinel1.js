@@ -57,6 +57,7 @@ module.exports.getS1Images = function(feature, options, callback) {
                 }
                 return callback(null, results);
             } else {
+                console.log("Cannot connect to scihub api");
                 return callback(null, results);
             }
         })

@@ -19,7 +19,7 @@ module.exports.imgDateUpdate = function(uuid, images, callback) {
 module.exports.getDB = function(callback) {
     mongodb.MongoClient.connect(mongodbUri, function(err, db) {
         var col = db.collection('disasters');
-        col.find({mail: {$not: {$size: 0}}}).toArray(function(err, docs) {
+        col.find({}).toArray(function(err, docs) {
             if (err) {
                 console.log("Couldn't retrieve disasterEvent from database");
                 return callback(err);

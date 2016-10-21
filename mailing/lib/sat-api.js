@@ -28,7 +28,7 @@ module.exports.getL8Images = function(feature, options, callback) {
             };
 
     request({
-        url: 'https://api.developmentseed.org/satellites', //URL to hit
+        url: 'https://api.developmentseed.org/satellites/', //URL to hit
         method: 'POST',
         json: query
     }, function(err, response, data){
@@ -54,6 +54,7 @@ module.exports.getL8Images = function(feature, options, callback) {
             }
             return callback(null, results);
         } else {
+            console.log("Cannot connect to sat-api");
             return callback(null, results);
         }
     })
@@ -77,7 +78,7 @@ module.exports.getS2Images = function(feature, options, callback) {
             };
 
     request({
-        url: 'https://api.developmentseed.org/satellites', //URL to hit
+        url: 'https://api.developmentseed.org/satellites/', //URL to hit
         method: 'POST',
         json: query
     }, function(err, response, data){
@@ -107,6 +108,7 @@ module.exports.getS2Images = function(feature, options, callback) {
             }
             return callback(null, results);
         } else {
+            console.log("Cannot connect to sat-api");
             return callback(null, results);
         }
     })

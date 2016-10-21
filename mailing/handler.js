@@ -121,6 +121,7 @@ function getImagery(doc, cb){
             for(var ii = 0; ii < doc.mail.length; ii++) {
 
                 var img2send = images.filter(function(e){
+                    console.log(e.sat, doc.mail[ii].satellite);
                     return (doc.mail[ii].satellite.indexOf(e.sat) > -1);
                 });
 
@@ -170,7 +171,7 @@ module.exports.checkImagery = function (event, context) {
             var doc = docs[i];
 
             getImagery(doc, function(err, res){
-
+                console.log(res)
                 count += 1
                 if (count ===  docs.length){
                     context.succeed("Done");
