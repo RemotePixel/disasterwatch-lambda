@@ -44,7 +44,7 @@ module.exports.getS1Images = function(event, context) {
                         results.push(scene)
                     }
                 }
-                context.succeed({'scenes': results});
+                context.succeed(results);
             } else {
                 context.fail('Could not connect to scihub api');
             }
