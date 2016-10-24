@@ -28,6 +28,7 @@ module.exports.getS1Images = function(feature, options, callback) {
 
     request.get('https://scihub.copernicus.eu/dhus/search')
         .auth(config.scihub.login, config.scihub.password)
+        .timeout(15000)
         .query({
             format: 'json',
             rows: 1000,

@@ -14,9 +14,7 @@ function sortScenes(a, b) {
     return Date.parse(b.date) - Date.parse(a.date);
 }
 
-
 var mailTemplate = fs.readFileSync('./templates/images_update.html', 'utf8');
-
 
 function construcMailInfo(prop, mail, images) {
 
@@ -131,7 +129,6 @@ function getImagery(doc, cb){
                     message = mark.up(mailTemplate, info),
                     params = {
                         Destination: {
-                            // ToAddresses: ["contact@remotepixel.ca"]
                             ToAddresses: [doc.mail[ii].mail]
                         },
                         Message: {
@@ -152,7 +149,7 @@ function getImagery(doc, cb){
 
             q2.awaitAll(function(error, results) {
                 db.imgDateUpdate(doc.uuid, doc.feature.properties.images, function(err, res) {
-                    return cb(null, 1)
+                    return cb(null, 1);
                 });
             });
         }
