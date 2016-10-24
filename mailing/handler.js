@@ -119,7 +119,6 @@ function getImagery(doc, cb){
             for(var ii = 0; ii < doc.mail.length; ii++) {
 
                 var img2send = images.filter(function(e){
-                    console.log(e.sat, doc.mail[ii].satellite);
                     return (doc.mail[ii].satellite.indexOf(e.sat) > -1);
                 });
 
