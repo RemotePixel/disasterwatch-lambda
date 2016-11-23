@@ -20,7 +20,7 @@ provider:
 functions:
   getS1Images:
     handler: handler.getS1Images
-    memorySize: 128
+    memorySize: 256
     timeout: 30
     events:
       - http:

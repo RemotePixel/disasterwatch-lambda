@@ -25,7 +25,7 @@ provider:
 functions:
   sendMail:
     handler: handler.checkImagery
-    memorySize: 128
+    memorySize: 256
     timeout: 100
     events:
-      - schedule: rate(6 hours)
+      - schedule: rate(1 hours)

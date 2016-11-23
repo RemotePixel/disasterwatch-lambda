@@ -19,7 +19,7 @@ module.exports.getS1Images = function(event, context) {
         .auth(config.auth.login, config.auth.password)
         .query({
             format: 'json',
-            rows: 1000,
+            rows: 50,
             q: query
         })
         .end(function(error, response) {

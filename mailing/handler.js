@@ -118,6 +118,8 @@ function getImagery(doc, cb){
             var q2 = d3.queue();
             for(var ii = 0; ii < doc.mail.length; ii++) {
 
+                if (doc.mail[ii].mail === '') {continue}
+
                 var img2send = images.filter(function(e){
                     return (doc.mail[ii].satellite.indexOf(e.sat) > -1);
                 });
@@ -142,8 +144,8 @@ function getImagery(doc, cb){
                         Source: "disasterwatch@remotepixel.ca"
                     };
 
-                    // Send the email
-                    q2.defer(sendMail, params);
+                // Send the email
+                q2.defer(sendMail, params);
             }
 
             q2.awaitAll(function(error, results) {

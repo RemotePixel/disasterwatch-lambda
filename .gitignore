@@ -2,3 +2,4 @@ node_modules
 .serverless
 config.js
 .DS_Store
+event.json
