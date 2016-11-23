@@ -1,0 +1,12 @@
+{
+  "name": "disasterwatch-https",
+  "version": "0.1.0",
+  "description": "server http content over https",
+  "main": "handler.js",
+  "engines": {
+    "node": "4.4.2"
+  },
+  "dependencies": {
+      "request": "^2.75.0"
+  }
+}
