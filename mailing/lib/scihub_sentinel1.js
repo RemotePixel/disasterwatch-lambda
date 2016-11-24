@@ -1,62 +1,65 @@
-var request = require('superagent');
-var parse = require('wellknown');
+var request = require('request');
+var turf = require('turf');
 var moment = require('moment');
 var config = require('./config');
 
-//Freely adapted from https://github.com/oyvindym/earth-observation-api
-function getAttribute(listTocheck, attribute) {
-    return listTocheck.filter(function(e){
-        return (e.name === attribute);
-    })[0];
-}
-
 module.exports.getS1Images = function(feature, options, callback) {
-
     if (options && options.hasOwnProperty('dateStart')) {
-        dateStart = moment(options.dateStart).utc().format("YYYY-MM-DDThh:mm:ss");
+        dateStart = moment(options.dateStart).utc().format("YYYY-MM-DD");
     } else {
-        dateStart = '2016-01-01T00:00:00';
+        dateStart = '2016-01-01';
     }
-    var results = []
-        query = 'beginPosition:[' + dateStart + 'Z TO ' + moment.utc().format("YYYY-MM-DDThh:mm:ss") + 'Z] AND ' +
-            'footprint:"Intersects(' + parse.stringify(feature) + ')" AND productType:SLC AND platformname:Sentinel-1';
+    var results = [],
+        query = {
+            startDate: dateStart,
+            completionDate: moment.utc().format('YYYY-MM-DD'),
+            productType: 'SLC',
+            maxRecords: 200
+        };
 
-    request.get('https://scihub.copernicus.eu/dhus/search')
-        .auth(config.scihub.login, config.scihub.password)
-        .timeout(3000)
-        .query({
-            format: 'json',
-            rows: 10,
-            q: query
-        })
-        .end(function(error, response) {
-            if (!error && response.statusCode == 200) {
-                if (response.body.feed.entry) {
-                    for (var i = 0; i < response.body.feed.entry.length; i += 1) {
-                        var data = response.body.feed.entry[i],
-                            scene = {};
+    if (feature.geometry.type === "Point") {
+        query.lat = feature.geometry.coordinates[1];
+        query.lon = feature.geometry.coordinates[0];
+    } else {
+        var bbox = turf.bbox(feature);
+        query.box = bbox[0] + ',' + bbox[1] + ',' + bbox[2] + ',' + bbox[3];
+    }
 
-                        scene.sceneID = data.title;
-                        scene.sat = 'sentinel1';
-                        scene.date = moment(getAttribute(data.date, 'beginposition').content).utc().format('YYYY-MM-DD');
-                        scene.fullDate = moment(getAttribute(data.date, 'beginposition').content).utc();
-                        scene.mode = getAttribute(data.str, 'sensoroperationalmode').content;
-                        scene.geometry = parse.parse(getAttribute(data.str, 'footprint').content);
-                        scene.orbType = getAttribute(data.str, 'orbitdirection').content;
-                        scene.polarisation = getAttribute(data.str, 'polarisationmode').content;
-                        scene.browseURL = "https://disasterwatch.remotepixel.ca/img/sentinel1.jpg";
-                        scene.product = getAttribute(data.str, 'producttype').content;
-                        scene.esaURL = data.link.filter(function(e){return e.rel === 'alternative'})[0].href + '$value';
-                        scene.downURL = data.link.filter(function(e){return e.rel === 'alternative'})[0].href + '$value';
-                        scene.refOrbit = getAttribute(data.int, 'relativeorbitnumber').content;
-                        scene.orbit = getAttribute(data.int, 'orbitnumber').content;
-                        results.push(scene)
-                    }
-                }
+    request({
+        url: 'https://peps.cnes.fr/resto/api/collections/S1/search.json', //URL to hit
+        qs: query
+    }, function(err, response, data){
+        if (!err && response.statusCode == 200) {
+            if (data.hasOwnProperty('ErrorMessage')) {
+                console.log("Cannot connect to PEPS api");
                 return callback(null, results);
             } else {
-                console.log("Cannot connect to scihub api");
-                return callback(null, results);
+                data = JSON.parse(data);
+                var i;
+                for (i = 0; i < data.features.length; i += 1) {
+                    var scene = {};
+                    scene.sceneID = data.features[i].properties.title;
+                    scene.sat = 'sentinel1';
+                    scene.date = moment(data.features[i].properties.startDate).utc().format("YYYY-MM-DD");
+                    scene.fullDate = data.features[i].properties.startDate;
+                    scene.mode = data.features[i].properties.sensorMode;
+                    scene.geometry = data.features[i].geometry;
+                    scene.orbType = data.features[i].properties.orbitDirection;
+                    scene.polarisation = data.features[i].properties.polarisation;
+                    scene.product = data.features[i].properties.productType;
+                    if (scene.product !== 'SLC') continue;
+                    scene.downURL = 'https://peps.cnes.fr/rocket/#/collections/S1/' +  data.features[i].id;
+                    scene.pepsdownURL = data.features[i].properties.services.download.url;
+                    scene.browseURL = data.features[i].properties.quicklook;
+                    scene.refOrbit = data.features[i].properties.orbitNumber;
+                    scene.orbit = data.features[i].properties.orbitNumber;
+                    results.push(scene)
+                }
             }
-        })
+            return callback(null, results);
+        } else {
+            console.log("Cannot connect to PEPS api");
+            return callback(null, results);
+        }
+    })
 }

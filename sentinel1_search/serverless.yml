@@ -17,15 +17,18 @@ provider:
   runtime: nodejs4.3
   stage: prod
   region: us-west-2
+  deploymentBucket: remotepixel
 functions:
   getS1Images:
     handler: handler.getS1Images
-    memorySize: 256
+    memorySize: 128
     timeout: 30
     events:
       - http:
-          method: POST
-          path: getS1images
-          request:
-            passThrough: WHEN_NO_MATCH
+          path: api/getS1Images
+          method: post
+          cors: true
+      - http:
+          path: api/getS1Images
+          method: get
           cors: true

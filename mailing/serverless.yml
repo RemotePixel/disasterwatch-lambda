@@ -15,17 +15,18 @@ service: disasterwatch-mailing
 provider:
   name: aws
   runtime: nodejs4.3
-  stage: test
+  stage: prod
   region: us-east-1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "ses:*"
       Resource: "*"
+  deploymentBucket: remotepixel-east
 functions:
   sendMail:
     handler: handler.checkImagery
     memorySize: 256
     timeout: 100
     events:
-      - schedule: rate(1 hours)
+      - schedule: rate(2 hours)

@@ -90,8 +90,6 @@ function getImagery(doc, cb){
             console.log('No new Image for event: ' + doc.feature.properties.name);
             return cb(null, 1)
         } else {
-            console.log(images.length + ' new Image for event: ' + doc.feature.properties.name);
-
             var s1img = images.filter(function(e){
                 return (e.sat === 'sentinel1');
             });
@@ -114,6 +112,9 @@ function getImagery(doc, cb){
             if (l8img.length !== 0) {
                 doc.feature.properties.images.landsat8 = l8img[0].date;
             }
+
+            console.log(images.length + ' new Image for event: ' + doc.feature.properties.name);
+            console.log("S1", s1img.length, "S2", s2img.length, "L8", l8img.length)
 
             var q2 = d3.queue();
             for(var ii = 0; ii < doc.mail.length; ii++) {
@@ -169,7 +170,7 @@ module.exports.checkImagery = function (event, context) {
             var doc = docs[i];
 
             getImagery(doc, function(err, res){
-                console.log(res)
+                // console.log(res)
                 count += 1
                 if (count ===  docs.length){
                     context.succeed("Done");

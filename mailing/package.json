@@ -11,7 +11,7 @@
       "querystring": "^0.2.0",
       "moment": "^2.15.1",
       "request": "^2.75.0",
-      "superagent": "^2.3.0",
+      "turf": "^3.0.14",
       "wellknown": "^0.5.0",
       "d3-queue": "^3.0.3",
       "markup-js": "1.5.21",
