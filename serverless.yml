@@ -23,6 +23,10 @@ provider:
       Action:
         - "ses:*"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::remotepixel-east/*"
 
 functions:
 
@@ -61,6 +65,13 @@ functions:
           cors: true
 
   #DATABASE
+  backup:
+    handler: database.backup
+    memorySize: 128
+    timeout: 30
+    events:
+      - schedule: rate(1 day)
+
   add:
     handler: database.add
     memorySize: 128
@@ -73,7 +84,7 @@ functions:
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
-          
+
   remove:
     handler: database.remove
     memorySize: 128

@@ -2,11 +2,13 @@ const mongodb = require('mongodb');
 const mark = require('markup-js');
 const aws = require('aws-sdk');
 const fs = require('fs');
+const moment = require('moment');
 
 const config = require('./lib/config');
 const mongodbUri = 'mongodb://' + config.mongodb.login + ':' + config.mongodb.password + '@' + config.mongodb.host + ':' + config.mongodb.port + '/ddb';
 
 const ses = new aws.SES({region: 'us-west-2'});
+const s3 = new aws.S3();
 
 function sendMail(content, callback) {
     ses.sendEmail(content, function (err) {
@@ -266,6 +268,7 @@ module.exports.toGEOJSON = function(event, context, callback) {
     });
 };
 
+//GETEVENT (id)
 module.exports.getEvent = function(event, context, callback) {
 
     mongodb.MongoClient.connect(mongodbUri, function(err, db) {
@@ -289,6 +292,32 @@ module.exports.getEvent = function(event, context, callback) {
 
             return callback(null, geojson);
 
+        });
+    });
+};
+
+//BACKUP
+module.exports.backup = function(event, context, callback) {
+
+    mongodb.MongoClient.connect(mongodbUri, function(err, db) {
+
+        const col = db.collection('disasters');
+        col.find({}).toArray(function(err, docs) {
+            db.close();
+
+            if (err) {
+                console.log('Couldn\'t retrieve disasterEvent from database');
+                return callback(err);
+            } else {
+
+                const key = 'dbbackup/disastersDB_' + moment().utc().format('YYYYMMDD_HHmmss') + '.json';
+                const params = {ACL: 'private', Bucket: 'remotepixel-east', Key: key, Body: JSON.stringify(docs)};
+                s3.upload(params, function(err) {
+                    if (err) return callback(err);
+                    return callback(null,'Disaster Event backup');
+                });
+
+            }
         });
     });
 };
