@@ -6,7 +6,7 @@ var aws = require('aws-sdk');
 
 var db = require('./lib/dbconnect.js');
 var satapi = require('./lib/sat-api.js');
-var scihubapi = require('./lib/scihub_sentinel1.js');
+var pepsapi = require('./lib/peps-api.js');
 
 var ses = new aws.SES({region: 'us-west-2'});
 
@@ -72,7 +72,7 @@ function sendMail (content, callback) {
 function getImagery(doc, cb){
 
     var q = d3.queue();
-    q.defer(scihubapi.getS1Images, doc.feature, {'dateStart': moment(doc.feature.properties.images.sentinel1).utc().add(1, 'days').format('YYYY-MM-DD')});
+    q.defer(pepsapi.getS1Images, doc.feature, {'dateStart': moment(doc.feature.properties.images.sentinel1).utc().add(1, 'days').format('YYYY-MM-DD')});
     q.defer(satapi.getL8Images, doc.feature, {'dateStart': moment(doc.feature.properties.images.landsat8).utc().add(1, 'days').format('YYYY-MM-DD')});
     q.defer(satapi.getS2Images, doc.feature, {'dateStart': moment(doc.feature.properties.images.sentinel2).utc().add(1, 'days').format('YYYY-MM-DD')});
     q.awaitAll(function(error, results) {
@@ -88,7 +88,7 @@ function getImagery(doc, cb){
 
         if (images.length === 0) {
             console.log('No new Image for event: ' + doc.feature.properties.name);
-            return cb(null, 1)
+            return cb(null, 1);
         } else {
             var s1img = images.filter(function(e){
                 return (e.sat === 'sentinel1');

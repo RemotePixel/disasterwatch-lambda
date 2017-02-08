@@ -11,92 +11,143 @@
 #
 # Happy Coding!
 
-service: disasterwatch-api
+service: disasterwatch
 provider:
   name: aws
   runtime: nodejs4.3
-  stage: test
+  stage: production
   region: us-east-1
+  deploymentBucket: remotepixel-east
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "ses:*"
       Resource: "*"
+
 functions:
+
+  #MAILING
+  sendMail:
+    handler: mailing.checkImagery
+    memorySize: 256
+    timeout: 100
+    events:
+      - schedule: rate(2 hours)
+
+  #http -> https
+  toHTTPS:
+    handler: https.toHTTPS
+    memorySize: 128
+    timeout: 10
+    events:
+      - http:
+          method: GET
+          path: toHTTPS
+          integration: lambda
+          request:
+            template:
+              application/json: '{ "url" : "$input.params(''url'')" }'
+          cors: true
+
+  #SENTINEL
+  getS1Images:
+    handler: peps.S1search
+    memorySize: 128
+    timeout: 30
+    events:
+      - http:
+          path: getS1Images
+          method: post
+          cors: true
+
+  #DATABASE
   add:
-    handler: handler.add
+    handler: database.add
     memorySize: 128
     timeout: 30
     events:
       - http:
+          integration: lambda
           method: POST
-          path: add
+          path: database/add
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
+          
   remove:
-    handler: handler.remove
+    handler: database.remove
     memorySize: 128
     timeout: 30
     events:
       - http:
+          integration: lambda
           method: POST
-          path: remove
+          path: database/remove
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
+
   update:
-    handler: handler.update
+    handler: database.update
     memorySize: 128
     timeout: 30
     events:
       - http:
+          integration: lambda
           method: POST
-          path: update
+          path: database/update
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
+
   toGEOJSON:
-    handler: handler.toGEOJSON
+    handler: database.toGEOJSON
     memorySize: 128
     timeout: 30
     events:
       - http:
+          integration: lambda
           method: GET
-          path: toGEOJSON
+          path: database/toGEOJSON
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
+
   getEvent:
-    handler: handler.getEvent
+    handler: database.getEvent
     memorySize: 128
     timeout: 30
     events:
       - http:
+          integration: lambda
           method: GET
-          path: getEvent
+          path: database/getEvent
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
+
   subscribe:
-    handler: handler.subscribe
+    handler: database.subscribe
     memorySize: 128
     timeout: 30
     events:
       - http:
+          integration: lambda
           method: POST
-          path: subscribe
+          path: database/subscribe
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
+
   unsubscribe:
-    handler: handler.unsubscribe
+    handler: database.unsubscribe
     memorySize: 128
     timeout: 30
     events:
       - http:
+          integration: lambda
           method: POST
-          path: unsubscribe
+          path: database/unsubscribe
           request:
             passThrough: WHEN_NO_MATCH
           cors: true
